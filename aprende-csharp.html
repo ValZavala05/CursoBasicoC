@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aprende C# tocando el código</title>
+<!-- Las fuentes son opcionales: si no hay internet se usan las de tu sistema -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#EAF1F7; --grid:#D0DDEA; --ink:#101A33; --ink2:#4A5573; --card:#FFFFFF;
+  --purple:#6B2FBF; --yellow:#FFD84D; --coral:#FF6B57; --teal:#12A594; --blue:#3A7BFF;
+  --good:#12A594; --bad:#E5484D;
+  --code:#1B1535; --code2:#2A2150;
+  --font:"Bricolage Grotesque","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Code",Consolas,"SFMono-Regular",Menlo,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--ink);font-family:var(--font);line-height:1.55;font-size:16px;
+  background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 60px}
+h1,h2,h3{font-family:var(--font);line-height:1.15;margin:0}
+h1{font-size:clamp(28px,5vw,46px);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(22px,3.4vw,30px);font-weight:800;margin-bottom:8px}
+h3{font-size:18px;font-weight:700;margin:0 0 10px}
+p{margin:0 0 10px}
+code{font-family:var(--mono);font-size:.9em;background:#E3DBF7;padding:1px 6px;border-radius:5px;color:#3D1A78}
+.lead{font-size:18px;max-width:70ch}
+.muted{color:var(--ink2)}
+
+/* Cabecera */
+.hero{display:flex;gap:18px;align-items:center;padding:14px 0 8px}
+.logo{flex:none;width:76px;height:76px;border-radius:14px;background:var(--purple);color:#fff;border:3px solid var(--ink);
+  box-shadow:5px 5px 0 var(--ink);display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:34px;transform:rotate(-4deg)}
+.hero p{margin:6px 0 0;color:var(--ink2);max-width:60ch}
+.progress{height:14px;border:2px solid var(--ink);border-radius:99px;background:#fff;overflow:hidden;margin-top:12px}
+.progress>div{height:100%;width:0;background:var(--teal);transition:width .5s}
+.plabel{font-size:14px;color:var(--ink2);margin:6px 2px 12px}
+
+/* Pestañas */
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 4px 12px;margin:0 -4px}
+.tab{flex:none;font:inherit;font-weight:600;font-size:15px;padding:8px 14px;border:2px solid var(--ink);border-radius:99px;background:#fff;color:var(--ink);cursor:pointer;display:flex;gap:6px;align-items:center}
+.tab:hover{background:#F4EEFF}
+.tab.active{background:var(--yellow);box-shadow:3px 3px 0 var(--ink)}
+.tab .ck{display:none;color:var(--teal);font-weight:800}
+.tab.done .ck{display:inline}
+
+/* Lecciones */
+.lesson{display:none}
+.lesson.active{display:block}
+.card{background:var(--card);border:2px solid var(--ink);border-radius:12px;padding:18px 20px;margin-bottom:20px;box-shadow:5px 5px 0 var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid2>.card{margin-bottom:0}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}.grid2>.card{margin-bottom:0}}
+
+/* Controles */
+label.field{display:block;font-weight:600;font-size:14px;margin-bottom:10px}
+label.field>span{display:block;margin-bottom:4px}
+input[type=text],input[type=number],select{font:inherit;font-family:var(--mono);font-size:15px;width:100%;padding:8px 10px;border:2px solid var(--ink);border-radius:8px;background:#fff;color:var(--ink)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+input[type=range]{width:100%;accent-color:var(--purple)}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;margin:6px 0 12px;cursor:pointer}
+.btn{font:inherit;font-weight:700;padding:9px 16px;border-radius:8px;border:2px solid var(--ink);background:var(--purple);color:#fff;cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+.btn:hover{filter:brightness(1.1)}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.btn.ghost{background:#fff;color:var(--ink)}
+.btn.accent{background:var(--yellow);color:var(--ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.row3{display:grid;grid-template-columns:110px 1fr 1fr;gap:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end}
+@media(max-width:520px){.row3,.row2{grid-template-columns:1fr}}
+
+/* Código */
+.code{background:var(--code);color:#EDE9FE;border-radius:10px;padding:10px 0;font-family:var(--mono);font-size:14px;overflow-x:auto;margin:8px 0 12px;border:2px solid var(--ink)}
+.ln{display:flex;min-height:24px;line-height:24px;padding-right:12px}
+.ln .no{flex:none;width:38px;text-align:right;padding-right:12px;color:#6F679B;user-select:none}
+.ln .tx{white-space:pre}
+.ln.clickable{cursor:pointer}
+.ln.clickable:hover{background:var(--code2)}
+.ln.active{background:rgba(255,216,77,.18);box-shadow:inset 4px 0 0 var(--yellow)}
+.k{color:#C4A1FF}.t{color:#5EEAD4}.s{color:#FFB08A}.n{color:#8DB8FF}.c{color:#8C86B0;font-style:italic}.f{color:#FFE27A}
+
+.console{background:#12102A;color:#E7E3FF;border:2px solid var(--ink);border-radius:10px;padding:12px 14px;font-family:var(--mono);font-size:14px;min-height:130px;margin:8px 0 12px;overflow:auto;max-height:280px}
+.console>div{min-height:20px;white-space:pre-wrap;word-break:break-word}
+.console .pr{color:#5EEAD4}
+.console .err{color:#FF8E8E}
+.console .muted{color:#8C86B0}
+
+.explain{background:#FFF3B8;border:2px solid var(--ink);border-radius:10px;padding:10px 14px;font-size:15px;min-height:52px}
+.note{font-size:14px;color:var(--ink2);border-left:4px solid var(--purple);padding-left:10px;margin-top:12px}
+.msg{min-height:22px;font-size:14px;margin:6px 0 12px;padding:0;border-radius:8px}
+.msg.ok{background:#D8F5EF;border:2px solid var(--teal);padding:8px 12px}
+.msg.err{background:#FFE1E0;border:2px solid var(--bad);padding:8px 12px;font-family:var(--mono);font-size:13px}
+
+/* Tipos de variable */
+.types{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.typecard{font:inherit;text-align:left;background:#fff;border:2px solid var(--ink);border-left:10px solid var(--c);border-radius:8px;padding:8px 10px;cursor:pointer;color:var(--ink)}
+.typecard b{font-family:var(--mono)}
+.typecard small{display:block;color:var(--ink2);line-height:1.3;margin-top:2px}
+.typecard.sel{background:#FFF3B8;box-shadow:3px 3px 0 var(--ink)}
+
+/* Memoria */
+.memory{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;min-height:120px}
+.vbox{border:2px solid var(--ink);border-radius:10px;background:#fff;overflow:hidden;animation:pop .35s}
+.vbox .th{padding:4px 10px;font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;background:var(--c)}
+.vbox[data-t=char] .th{color:var(--ink)}
+.vbox .nm{padding:8px 10px 0;font-family:var(--mono);font-weight:700}
+.vbox .vl{padding:2px 10px 8px;font-family:var(--mono);font-size:18px;word-break:break-all}
+.vbox .ad{padding:4px 10px;border-top:2px dashed var(--grid);font-size:11px;color:var(--ink2);font-family:var(--mono)}
+.vbox.flash{animation:flash .7s}
+.empty{grid-column:1/-1;color:var(--ink2);border:2px dashed var(--ink2);border-radius:10px;padding:26px;text-align:center}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes flash{0%,100%{background:#fff}30%{background:var(--yellow)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.shake{animation:shake .4s}
+
+/* Operadores */
+.seg{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}
+.seg button{font:inherit;font-family:var(--mono);font-weight:700;font-size:20px;min-width:48px;padding:6px 12px;border:2px solid var(--ink);border-radius:8px;background:#fff;cursor:pointer;color:var(--ink)}
+.seg button.on{background:var(--purple);color:#fff;box-shadow:3px 3px 0 var(--ink)}
+.seg.txt button{font-size:15px}
+.opline{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:14px 0}
+.numbox{min-width:68px;padding:10px 14px;text-align:center;border:2px solid var(--ink);border-radius:10px;font-family:var(--mono);font-size:28px;font-weight:700;background:#fff}
+.numbox.res{background:var(--yellow);animation:pop .3s}
+.numbox.bad{background:#FFE1E0;color:var(--bad);font-size:20px}
+.opsym{width:44px;height:44px;border-radius:50%;background:var(--purple);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:700;border:2px solid var(--ink)}
+.eq{font-size:28px;font-weight:700}
+.dots{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;min-height:24px;padding:6px}
+.grp{display:inline-flex;flex-wrap:wrap;gap:4px;padding:5px;border:2px solid var(--ink);border-radius:8px;margin:3px;background:#fff;max-width:100%}
+.grp.rest{border-style:dashed;background:#FFE9E6}
+.dgrid{display:grid;gap:4px}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--blue)}
+.dot.c2{background:var(--coral)}
+.dot.r{background:var(--bad);animation:pulse 1.2s infinite}
+.dot.x{background:transparent;border:2px dashed var(--bad)}
+@keyframes pulse{50%{transform:scale(1.35)}}
+.caption{text-align:center;font-size:14px;color:var(--ink2);min-height:22px}
+
+/* Condicionales */
+.bigval{font-family:var(--mono);font-size:42px;font-weight:700;text-align:center}
+.flow{display:flex;flex-direction:column;gap:4px;align-items:flex-start;margin-top:8px}
+.frow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.node{padding:10px 14px;border-radius:10px;border:2px solid var(--ink);background:#fff;font-family:var(--mono);font-size:14px;transition:all .3s}
+.node.dim{opacity:.3}
+.node.t{background:#D8F5EF;border-color:var(--teal);box-shadow:0 0 0 4px rgba(18,165,148,.25)}
+.node.f{background:#FFE1E0;border-color:var(--bad)}
+.node.win{background:var(--yellow);box-shadow:3px 3px 0 var(--ink);font-weight:700}
+.arrow{color:var(--ink2);font-weight:700;font-size:14px}
+.vline{margin-left:34px;color:var(--ink2);font-weight:700;font-size:14px}
+.verdict{text-align:center;font-size:24px;font-weight:800;margin-top:6px}
+.tt{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin:8px 0 14px}
+.toggle{font:inherit;font-family:var(--mono);font-weight:700;padding:10px 18px;border-radius:99px;border:2px solid var(--ink);cursor:pointer;min-width:120px;color:#fff}
+.toggle.T{background:var(--teal)}.toggle.F{background:var(--bad)}
+.pills{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.pill{border:2px solid var(--ink);border-radius:10px;padding:8px 12px;text-align:center;font-family:var(--mono);font-size:14px;background:#fff}
+.pill b{display:block;font-size:20px;margin-top:2px}
+.pill.T b{color:var(--teal)}.pill.F b{color:var(--bad)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{border:2px solid var(--ink);border-radius:8px;padding:2px 10px;font-size:14px;background:#fff}
+.chip code{background:none;font-size:16px;font-weight:700}
+
+/* Bucles */
+.legend{display:grid;gap:8px;margin:8px 0 12px;font-size:14px}
+.legend div{display:flex;gap:8px;align-items:flex-start}
+.legend b{flex:none;width:24px;height:24px;border-radius:50%;background:var(--yellow);border:2px solid var(--ink);display:grid;place-items:center;font-size:13px}
+.varbox{display:inline-flex;align-items:center;gap:12px;border:2px solid var(--ink);border-radius:10px;padding:8px 16px;background:#fff;font-family:var(--mono);margin:6px 0}
+.varbox .vv{font-size:32px;font-weight:700;min-width:44px;text-align:center}
+.varbox.gone{opacity:.45;border-style:dashed}
+.tiles{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.tile{width:46px;height:46px;border:2px dashed var(--ink2);border-radius:10px;display:grid;place-items:center;font-family:var(--mono);font-weight:700;color:var(--ink2);transition:all .3s}
+.tile.done{border-style:solid;border-color:var(--ink);background:var(--blue);color:#fff}
+.tile.now{background:var(--yellow);color:var(--ink);transform:scale(1.15);box-shadow:3px 3px 0 var(--ink)}
+.badge{display:inline-block;font-family:var(--mono);font-weight:700;padding:1px 10px;border-radius:99px;border:2px solid var(--ink);margin-left:6px;font-size:13px}
+.badge.T{background:#D8F5EF}.badge.F{background:#FFE1E0}
+
+/* Arreglos */
+.cells{display:flex;flex-wrap:wrap;padding:10px 4px 6px}
+.cell{min-width:96px;border:2px solid var(--ink);margin-left:-2px;background:#fff;cursor:pointer;text-align:center;transition:background .2s}
+.cell:hover{background:#F4EEFF}
+.cell .v{padding:14px 8px;font-family:var(--mono);font-weight:700;word-break:break-word}
+.cell .ix{padding:4px;background:var(--ink);color:#fff;font-family:var(--mono);font-size:12px}
+.cell.sel{background:var(--yellow)}
+.cell.hi{background:#A9EBDD;transform:translateY(-6px)}
+
+/* Quiz */
+.q{font-size:20px;font-weight:700;margin-bottom:12px}
+.opts{display:grid;gap:10px}
+.opt{font:inherit;font-family:var(--mono);font-size:15px;text-align:left;padding:10px 14px;border:2px solid var(--ink);border-radius:8px;background:#fff;cursor:pointer;color:var(--ink)}
+.opt:hover:not(:disabled){background:#F4EEFF}
+.opt.right{background:#D8F5EF;border-color:var(--teal)}
+.opt.wrong{background:#FFE1E0;border-color:var(--bad)}
+.opt:disabled{cursor:default}
+.qmeta{color:var(--ink2);font-size:14px;margin-bottom:6px}
+.final{text-align:center;padding:16px 0}
+.final .big{font-size:64px}
+
+.pager{display:flex;justify-content:space-between;gap:10px;margin-top:8px}
+footer{margin-top:36px;text-align:center;color:var(--ink2);font-size:14px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="logo" aria-hidden="true">C#</div>
+  <div>
+    <h1>Aprende C# tocando el código</h1>
+    <p>Siete lecciones cortas para empezar a programar. En cada una puedes cambiar valores, pulsar botones y ver qué hace tu código.</p>
+  </div>
+</header>
+<div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="pbar"><div id="bar"></div></div>
+<div class="plabel" id="plabel"></div>
+<nav class="tabs" id="tabs" aria-label="Lecciones"></nav>
+
+<main>
+
+<!-- ============ 1. HOLA MUNDO ============ -->
+<section class="lesson" data-title="Hola mundo" data-icon="👋">
+  <div class="card">
+    <h2>Tu primer programa</h2>
+    <p class="lead">Todo programador empieza mostrando un mensaje en pantalla. Escribe tu texto, ejecuta el programa y toca cada línea del código para saber qué hace.</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Código</h3>
+      <label class="field"><span>Mensaje que mostrará el programa</span>
+        <input type="text" id="helloMsg" value="¡Hola, mundo!" maxlength="40"></label>
+      <label class="check"><input type="checkbox" id="helloErr"> Quitar el punto y coma para ver un error</label>
+      <div class="code" id="helloCode"></div>
+      <div class="explain" id="helloExplain"></div>
+    </div>
+    <div class="card">
+      <h3>Consola</h3>
+      <div class="console" id="con1"><span class="muted">Pulsa «Ejecutar» para ver el resultado.</span></div>
+      <button class="btn" id="helloRun">▶ Ejecutar</button>
+      <p class="note">Desde C# 9 puedes escribir solo la línea <code>Console.WriteLine("...");</code> en un archivo y funciona igual. Aquí se muestra la estructura completa para que veas todas las piezas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. VARIABLES ============ -->
+<section class="lesson" data-title="Variables" data-icon="📦">
+  <div class="card">
+    <h2>Variables: cajas con nombre</h2>
+    <p class="lead">Una variable guarda un dato en la memoria. Tiene un <b>tipo</b> (qué clase de dato cabe), un <b>nombre</b> y un <b>valor</b>. Elige un tipo para empezar.</p>
+    <div class="types" id="typeCards"></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Declara una variable</h3>
+      <div class="row3">
+        <label class="field"><span>Tipo</span><select id="vType"></select></label>
+        <label class="field"><span>Nombre</span><input type="text" id="vName" value="edad" maxlength="20" autocomplete="off"></label>
+        <label class="field"><span>Valor</span><input type="text" id="vVal" value="15" maxlength="24" autocomplete="off"></label>
+      </div>
+      <div class="code" id="varPreview"></div>
+      <div class="btnrow">
+        <button class="btn" id="varAdd">Declarar variable</button>
+        <button class="btn ghost" id="varDemo">Cargar ejemplo</button>
+        <button class="btn ghost" id="varClear">Vaciar memoria</button>
+      </div>
+      <div class="msg" id="varMsg" aria-live="polite"></div>
+      <h3>Cambia su valor</h3>
+      <div class="row2">
+        <label class="field"><span>Variable</span><select id="aVar"></select></label>
+        <label class="field"><span>Nuevo valor</span><input type="text" id="aVal" maxlength="24" autocomplete="off"></label>
+        <button class="btn accent" id="varAssign" style="margin-bottom:10px">Asignar</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Memoria del programa</h3>
+      <div class="memory" id="memory"></div>
+      <p class="note">Cada caja muestra el tipo, el nombre, el valor y una dirección de memoria de ejemplo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. OPERADORES ============ -->
+<section class="lesson" data-title="Operadores" data-icon="➗">
+  <div class="card">
+    <h2>Operadores: hacer cuentas</h2>
+    <p class="lead">C# calcula con <code>+</code> <code>-</code> <code>*</code> <code>/</code> y <code>%</code>. Cambia los números, el operador y el tipo de dato: verás que <b>7 / 2</b> no siempre da lo mismo.</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Prueba una operación</h3>
+      <div class="row3" style="grid-template-columns:1fr 1fr">
+        <label class="field"><span>Número a</span><input type="number" id="opA" value="7" step="any"></label>
+        <label class="field"><span>Número b</span><input type="number" id="opB" value="2" step="any"></label>
+      </div>
+      <div class="seg" id="opBtns" role="group" aria-label="Operador">
+        <button data-op="+">+</button><button data-op="-">-</button><button data-op="*">*</button><button data-op="/" class="on">/</button><button data-op="%">%</button>
+      </div>
+      <div class="seg txt" id="modeBtns" role="group" aria-label="Tipo de dato">
+        <button data-mode="int" class="on">int (enteros)</button><button data-mode="double">double (decimales)</button>
+      </div>
+      <div class="code" id="opCode"></div>
+      <div class="explain" id="opExplain"></div>
+    </div>
+    <div class="card">
+      <h3>Así se ve</h3>
+      <div class="opline" id="opLine"></div>
+      <div class="dots" id="opDots"></div>
+      <div class="caption" id="opCap"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. CONDICIONALES ============ -->
+<section class="lesson" data-title="Condicionales" data-icon="🔀">
+  <div class="card">
+    <h2>Condicionales: tomar decisiones</h2>
+    <p class="lead">Con <code>if</code>, <code>else if</code> y <code>else</code> el programa elige qué camino seguir. Mueve la nota y mira qué líneas se ejecutan y cuáles se saltan.</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Nota del estudiante</h3>
+      <input type="range" id="nota" min="0" max="100" value="75" aria-label="Nota">
+      <div class="bigval" id="notaVal">75</div>
+      <div class="code" id="ifCode"></div>
+      <div class="verdict" id="ifVerdict"></div>
+    </div>
+    <div class="card">
+      <h3>Diagrama de flujo</h3>
+      <div class="flow" id="flow">
+        <div class="frow"><div class="node" id="c0">nota &gt;= 90 ?</div><span class="arrow">sí</span><div class="node" id="o0">Excelente</div></div>
+        <div class="vline">no ↓</div>
+        <div class="frow"><div class="node" id="c1">nota &gt;= 60 ?</div><span class="arrow">sí</span><div class="node" id="o1">Aprobado</div></div>
+        <div class="vline">no ↓</div>
+        <div class="frow"><div class="node" id="o2">Reprobado</div></div>
+      </div>
+      <p class="note">Verde: la condición fue verdadera. Rojo: fue falsa. Apagado: el programa ni la revisó.</p>
+    </div>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <h3>Combinar condiciones con &amp;&amp;, || y !</h3>
+    <p>Pulsa los botones para cambiar A y B entre <code>true</code> y <code>false</code>.</p>
+    <div class="tt">
+      <button class="toggle T" id="tA">A = true</button>
+      <button class="toggle T" id="tB">B = true</button>
+    </div>
+    <div class="pills" id="tPills"></div>
+    <div class="chips">
+      <span class="chip"><code>==</code> igual</span><span class="chip"><code>!=</code> distinto</span>
+      <span class="chip"><code>&lt;</code> menor</span><span class="chip"><code>&gt;</code> mayor</span>
+      <span class="chip"><code>&lt;=</code> menor o igual</span><span class="chip"><code>&gt;=</code> mayor o igual</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. BUCLES ============ -->
+<section class="lesson" data-title="Bucles" data-icon="🔁">
+  <div class="card">
+    <h2>Bucles: repetir sin copiar y pegar</h2>
+    <p class="lead">Un bucle <code>for</code> repite un bloque de código. Ejecútalo paso a paso y mira cómo cambia la variable <code>i</code> en cada vuelta.</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Código</h3>
+      <label class="field"><span>Número de vueltas: <b id="loopNVal">5</b></span>
+        <input type="range" id="loopN" min="1" max="10" value="5"></label>
+      <div class="code" id="loopCode"></div>
+      <div class="legend">
+        <div><b>1</b><span><code>int i = 1</code> Inicio: se crea <code>i</code> una sola vez.</span></div>
+        <div><b>2</b><span><code>i &lt;= N</code> Condición: se revisa antes de cada vuelta.</span></div>
+        <div><b>3</b><span><code>i++</code> Incremento: suma 1 a <code>i</code> al terminar cada vuelta.</span></div>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="loopStep">Siguiente paso</button>
+        <button class="btn accent" id="loopAuto">▶ Automático</button>
+        <button class="btn ghost" id="loopReset">Reiniciar</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Lo que pasa</h3>
+      <div class="explain" id="loopExplain"></div>
+      <div class="varbox" id="loopVar"><span>int i =</span><span class="vv" id="loopI">–</span></div>
+      <div class="tiles" id="loopTiles"></div>
+      <div class="console" id="con4"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. ARREGLOS ============ -->
+<section class="lesson" data-title="Arreglos" data-icon="🧺">
+  <div class="card">
+    <h2>Arreglos: muchos datos en fila</h2>
+    <p class="lead">Un arreglo (<i>array</i>) guarda varios valores del mismo tipo. Cada uno tiene un <b>índice</b> y el primero es el <b>0</b>, no el 1. Elige un índice, lee o cambia su valor, y prueba uno que no exista.</p>
+    <div class="code" id="arrCode"></div>
+    <div class="cells" id="arrCells"></div>
+    <p class="muted" style="margin:6px 4px 0">Tamaño: <code>frutas.Length</code> = <b id="arrLen">4</b>. Toca una casilla para elegir su índice.</p>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h3>Controles</h3>
+      <div class="row3" style="grid-template-columns:110px 1fr">
+        <label class="field"><span>Índice</span><input type="number" id="arrIdx" value="0" step="1"></label>
+        <label class="field"><span>Valor nuevo</span><input type="text" id="arrVal" value="Sandía" maxlength="16" autocomplete="off"></label>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="arrRead">Leer frutas[i]</button>
+        <button class="btn accent" id="arrWrite">Asignar frutas[i]</button>
+        <button class="btn ghost" id="arrEach">Recorrer todo</button>
+      </div>
+      <p class="note">Con 4 elementos los índices válidos son 0, 1, 2 y 3. Si pides el 4 o un número negativo, C# lanza una excepción.</p>
+    </div>
+    <div class="card">
+      <h3>Instrucción y resultado</h3>
+      <div class="code" id="arrOp"></div>
+      <div class="console" id="con5"><span class="muted">Aquí aparecerá lo que imprime el programa.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. QUIZ ============ -->
+<section class="lesson" data-title="Ponte a prueba" data-icon="🏆">
+  <div class="card" id="quizBox"></div>
+</section>
+
+</main>
+
+<div class="pager">
+  <button class="btn ghost" id="prev">Lección anterior</button>
+  <button class="btn" id="next">Lección siguiente</button>
+</div>
+<footer>Hecho para practicar C#. Todo funciona sin instalar nada: solo abre este archivo en tu navegador.</footer>
+</div>
+
+<script>
+/* ============ Utilidades ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const KW=new Set(['using','namespace','class','static','void','if','else','for','foreach','in','while','return','new','true','false','null','public','private','break','continue','do']);
+const TY=new Set(['int','double','string','bool','char','float','long','decimal','var','Console','Math','String','Exception']);
+
+/* Resaltado de sintaxis muy simple para C# */
+function hl(src){
+  const re=/(\/\/.*$)|("(?:[^"\\]|\\.)*")|('(?:[^'\\]|\\.)')|(\b\d+(?:\.\d+)?\b)|(\b[A-Za-z_]\w*\b)/g;
+  let out='',last=0,m;
+  while((m=re.exec(src))){
+    out+=esc(src.slice(last,m.index));
+    const t=m[0]; let cls='';
+    if(m[1])cls='c'; else if(m[2]||m[3])cls='s'; else if(m[4])cls='n';
+    else if(KW.has(t))cls='k'; else if(TY.has(t))cls='t'; else if(src[re.lastIndex]==='(')cls='f';
+    out+=cls?`<span class="${cls}">${esc(t)}</span>`:esc(t);
+    last=re.lastIndex;
+  }
+  return out+esc(src.slice(last));
+}
+function renderCode(el,lines){
+  el.innerHTML=lines.map((l,i)=>`<div class="ln" data-i="${i}"><span class="no">${i+1}</span><span class="tx">${hl(l)}</span></div>`).join('');
+}
+function setActive(el,idx){
+  $$('.ln',el).forEach(l=>l.classList.toggle('active',idx.includes(+l.dataset.i)));
+}
+
+/* ============ Navegación entre lecciones ============ */
+const secs=$$('.lesson'); const visited=new Set(); let curTab=0;
+const tabsEl=$('#tabs');
+secs.forEach((s,i)=>{
+  const b=document.createElement('button');
+  b.className='tab'; b.innerHTML=`<span>${s.dataset.icon}</span><span>${s.dataset.title}</span><span class="ck">✓</span>`;
+  b.onclick=()=>go(i); tabsEl.appendChild(b);
+});
+function go(i){
+  curTab=i; visited.add(i);
+  secs.forEach((s,k)=>s.classList.toggle('active',k===i));
+  $$('.tab').forEach((t,k)=>{t.classList.toggle('active',k===i);t.classList.toggle('done',visited.has(k)&&k!==i);});
+  const pct=Math.round(visited.size/secs.length*100);
+  $('#bar').style.width=pct+'%'; $('#pbar').setAttribute('aria-valuenow',pct);
+  $('#plabel').textContent=`Lecciones visitadas: ${visited.size} de ${secs.length}`;
+  $('#prev').disabled=i===0; $('#next').disabled=i===secs.length-1;
+  tabsEl.scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('#prev').onclick=()=>go(curTab-1);
+$('#next').onclick=()=>go(curTab+1);
+
+/* ============ 1. HOLA MUNDO ============ */
+(function(){
+  const msgEl=$('#helloMsg'),errEl=$('#helloErr'),codeEl=$('#helloCode'),exEl=$('#helloExplain'),con=$('#con1'),btn=$('#helloRun');
+  let sel=8,busy=false;
+  const EXP=[
+    '<code>using System;</code> importa el espacio de nombres <b>System</b>, donde vive <code>Console</code>. Sin esta línea tendrías que escribir <code>System.Console</code> cada vez.',
+    'Línea en blanco: ordena el código y lo hace más fácil de leer.',
+    '<code>namespace</code> es una carpeta lógica que agrupa tu código. Normalmente lleva el nombre de tu proyecto.',
+    'La llave <code>{</code> abre un bloque de código. Cada llave que abres debe cerrarse con <code>}</code>.',
+    'En C# el código vive dentro de <b>clases</b>. Esta se llama <code>Program</code>.',
+    'Abre el bloque de la clase.',
+    '<code>Main</code> es la puerta de entrada: el programa siempre empieza a ejecutarse aquí.',
+    'Abre el bloque del método <code>Main</code>. Lo que escribas aquí dentro se ejecuta de arriba hacia abajo.',
+    '<code>Console.WriteLine(...)</code> escribe el texto en la consola y salta a la línea siguiente. El texto va entre comillas dobles y la instrucción termina con <b>punto y coma (;)</b>.',
+    'Cierra el método <code>Main</code>.','Cierra la clase.','Cierra el namespace.'
+  ];
+  function lines(){
+    const m=msgEl.value.replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+    return ['using System;','','namespace MiPrimerPrograma','{','    class Program','    {','        static void Main(string[] args)','        {',
+      `            Console.WriteLine("${m}")${errEl.checked?'':';'}`,'        }','    }','}'];
+  }
+  function mark(){setActive(codeEl,[sel]);exEl.innerHTML=EXP[sel];}
+  function draw(){
+    renderCode(codeEl,lines());
+    $$('.ln',codeEl).forEach(l=>{l.classList.add('clickable');l.onclick=()=>{sel=+l.dataset.i;mark();};});
+    mark();
+  }
+  msgEl.oninput=draw; errEl.onchange=draw;
+  btn.onclick=async()=>{
+    if(busy)return; busy=true; btn.disabled=true;
+    con.innerHTML='<div><span class="pr">$</span> dotnet run</div>';
+    sel=8; mark(); await sleep(500);
+    if(errEl.checked){
+      con.insertAdjacentHTML('beforeend','<div class="err">Program.cs(9,'+(45+msgEl.value.length)+'): error CS1002: Se esperaba ;</div><div class="err">La compilación falló. El programa no se ejecutó.</div>');
+    }else{
+      const d=document.createElement('div'); con.appendChild(d);
+      for(const ch of msgEl.value){d.textContent+=ch;await sleep(35);}
+      con.insertAdjacentHTML('beforeend','<div class="muted">Programa finalizado.</div>');
+    }
+    busy=false; btn.disabled=false;
+  };
+  draw();
+})();
+
+/* ============ 2. VARIABLES ============ */
+(function(){
+  const TYPES={
+    int:{c:'#3A7BFF',d:'Números enteros',ex:'42, -7, 0',def:'15',nm:'edad'},
+    double:{c:'#12A594',d:'Números con decimales',ex:'3.14, -0.5',def:'1.62',nm:'altura'},
+    string:{c:'#FF6B57',d:'Texto entre comillas dobles',ex:'"Hola"',def:'Ana',nm:'nombre'},
+    bool:{c:'#6B2FBF',d:'Verdadero o falso',ex:'true, false',def:'true',nm:'esEstudiante'},
+    char:{c:'#F5B700',d:'Un solo carácter, entre comillas simples',ex:"'A'",def:'A',nm:'inicial'}
+  };
+  const typeCards=$('#typeCards'),tSel=$('#vType'),nEl=$('#vName'),vEl=$('#vVal'),prev=$('#varPreview'),msg=$('#varMsg'),mem=$('#memory'),aVar=$('#aVar'),aVal=$('#aVal');
+  let vars=[],flashName=null;
+  Object.entries(TYPES).forEach(([k,t])=>{
+    tSel.insertAdjacentHTML('beforeend',`<option>${k}</option>`);
+    const b=document.createElement('button'); b.className='typecard'; b.style.setProperty('--c',t.c); b.dataset.t=k;
+    b.innerHTML=`<b>${k}</b><small>${t.d}<br>Ej: ${esc(t.ex)}</small>`;
+    b.onclick=()=>{tSel.value=k;nEl.value=t.nm;vEl.value=t.def;update();};
+    typeCards.appendChild(b);
+  });
+  function literal(type,raw){
+    if(type==='string')return '"'+raw.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"';
+    if(type==='char')return "'"+raw+"'";
+    return raw;
+  }
+  function parse(type,raw){
+    if(type==='int'){
+      if(!/^-?\d+$/.test(raw))return{err:`error CS0029: no se puede convertir «${raw}» a int. Un int solo acepta números enteros, sin punto ni letras.`};
+      if(Math.abs(+raw)>2147483647)return{err:'error CS1021: el valor es demasiado grande para un int (máximo 2147483647).'};
+    }
+    if(type==='double'){
+      if(/^-?\d+,\d+$/.test(raw))return{err:'error CS1002: en C# los decimales llevan punto, no coma. Escribe '+raw.replace(',','.')+'.'};
+      if(!/^-?\d+(\.\d+)?$/.test(raw))return{err:`error CS0029: no se puede convertir «${raw}» a double. Escribe un número, por ejemplo 3.14.`};
+    }
+    if(type==='bool'&&raw!=='true'&&raw!=='false'){
+      const hint=/^(true|false)$/i.test(raw)?' En C# se escribe en minúsculas.':'';
+      return{err:`error CS0029: un bool solo puede ser true o false.${hint}`};
+    }
+    if(type==='char'&&[...raw].length!==1)return{err:'error CS1012: un char guarda exactamente un carácter. Para texto largo usa string.'};
+    return{ok:true};
+  }
+  function say(t,cls){msg.className='msg '+cls;msg.textContent=t;}
+  function update(){
+    $$('.typecard',typeCards).forEach(b=>b.classList.toggle('sel',b.dataset.t===tSel.value));
+    renderCode(prev,[`${tSel.value} ${nEl.value||'nombre'} = ${literal(tSel.value,vEl.value)||'valor'};`]);
+  }
+  function drawMem(){
+    if(!vars.length){mem.innerHTML='<div class="empty">La memoria está vacía. Declara tu primera variable.</div>';}
+    else mem.innerHTML=vars.map((v,i)=>`<div class="vbox${v.n===flashName?' flash':''}" data-t="${v.t}" style="--c:${TYPES[v.t].c}">
+      <div class="th">${v.t}</div><div class="nm">${esc(v.n)}</div>
+      <div class="vl">${esc(literal(v.t,v.v))}</div><div class="ad">0x7FF${(0x1A40+i*8).toString(16).toUpperCase()}</div></div>`).join('');
+    aVar.innerHTML=vars.map(v=>`<option>${esc(v.n)}</option>`).join('');
+    flashName=null;
+  }
+  function declare(t,n,v){
+    vars.push({t,n,v});
+  }
+  $('#varAdd').onclick=()=>{
+    const t=tSel.value,n=nEl.value.trim(),v=vEl.value;
+    if(!/^[A-Za-z_][A-Za-z0-9_]*$/.test(n))return say('error CS1001: el nombre debe empezar con letra o _ y solo tener letras, números o _ (sin espacios).','err');
+    if(KW.has(n)||TY.has(n))return say(`error CS1041: «${n}» es una palabra reservada de C#. Elige otro nombre.`,'err');
+    if(vars.some(x=>x.n===n))return say(`error CS0128: ya existe una variable llamada «${n}». Usa otro nombre o cambia su valor abajo.`,'err');
+    const p=parse(t,v); if(p.err)return say(p.err,'err');
+    declare(t,n,v); flashName=n; drawMem();
+    say(`Compilado. Se creó ${n} de tipo ${t}.`,'ok');
+  };
+  $('#varAssign').onclick=()=>{
+    const v=vars.find(x=>x.n===aVar.value);
+    if(!v)return say('No hay variables para cambiar. Declara una primero.','err');
+    const p=parse(v.t,aVal.value); if(p.err)return say(p.err,'err');
+    v.v=aVal.value; flashName=v.n; drawMem();
+    say(`Compilado. ${v.n} = ${literal(v.t,v.v)};`,'ok');
+  };
+  $('#varDemo').onclick=()=>{
+    vars=[]; declare('string','nombre','Ana');declare('int','edad','15');declare('double','altura','1.62');
+    declare('bool','esEstudiante','true');declare('char','inicial','A'); drawMem(); say('Ejemplo cargado. Prueba cambiar el valor de una variable.','ok');
+  };
+  $('#varClear').onclick=()=>{vars=[];drawMem();say('','');};
+  [tSel,nEl,vEl].forEach(e=>e.addEventListener('input',update));
+  tSel.addEventListener('change',()=>{const t=TYPES[tSel.value];nEl.value=t.nm;vEl.value=t.def;update();});
+  declare('string','nombre','Ana'); declare('int','edad','15');
+  drawMem(); update();
+})();
+
+/* ============ 3. OPERADORES ============ */
+(function(){
+  let op='/',mode='int';
+  const A=$('#opA'),B=$('#opB'),line=$('#opLine'),dots=$('#opDots'),cap=$('#opCap'),code=$('#opCode'),ex=$('#opExplain');
+  const fmt=n=>Number.isNaN(n)?'NaN':(!Number.isFinite(n)?(n>0?'Infinity':'-Infinity'):String(n));
+  const rep=(n,c)=>Array.from({length:n},()=>`<i class="dot ${c}"></i>`).join('');
+  function viz(a,b){
+    const ints=Number.isInteger(a)&&Number.isInteger(b);
+    if(!ints)return['',''];
+    if(op==='+'&&a>=0&&b>=0&&a+b<=50)return[`<span class="grp">${rep(a,'')}</span><span class="grp">${rep(b,'c2')}</span>`,'Juntas las dos bolsitas: eso es la suma.'];
+    if(op==='-'&&a>=0&&b>=0&&a<=50&&b<=50)return[`<span class="grp">${rep(Math.max(a-b,0),'')}${rep(Math.min(a,b),'x')}</span>`,b>a?'Quitas más de las que hay, así que el resultado es negativo.':'Los círculos punteados son los que quitas; los azules son los que quedan.'];
+    if(op==='*'&&a>=1&&a<=10&&b>=1&&b<=12)return[`<div class="dgrid" style="grid-template-columns:repeat(${b},14px)">${rep(a*b,'')}</div>`,`${a} filas de ${b} puntos.`];
+    if((op==='/'||op==='%')&&mode==='int'&&a>=0&&b>0&&a<=48){
+      const q=Math.floor(a/b),r=a%b;let h='';
+      for(let k=0;k<q;k++)h+=`<span class="grp">${rep(b,k%2?'c2':'')}</span>`;
+      if(r)h+=`<span class="grp rest">${rep(r,'r')}</span>`;
+      return[h,`Se forman ${q} grupos completos de ${b} (eso es el cociente, /) y sobran ${r} (eso es el resto, %).`];
+    }
+    return['',''];
+  }
+  function compute(){
+    let a=parseFloat(A.value),b=parseFloat(B.value);
+    if(Number.isNaN(a))a=0; if(Number.isNaN(b))b=0;
+    if(mode==='int'){a=Math.trunc(a);b=Math.trunc(b);}
+    let r,ex_='',err=false;
+    if(mode==='int'&&(op==='/'||op==='%')&&b===0){err=true;}
+    else if(op==='+')r=a+b; else if(op==='-')r=a-b; else if(op==='*')r=a*b;
+    else if(op==='/')r=mode==='int'?Math.trunc(a/b):a/b;
+    else r=a%b;
+    const T=mode;
+    const out=err?'// lanza DivideByZeroException':`// muestra ${fmt(r)}`;
+    renderCode(code,[`${T} a = ${a};`,`${T} b = ${b};`,`${T} resultado = a ${op} b;`,`Console.WriteLine(resultado); ${out}`]);
+    line.innerHTML=`<div class="numbox">${a}</div><div class="opsym">${op}</div><div class="numbox">${b}</div><div class="eq">=</div>`+
+      (err?'<div class="numbox bad">💥 Excepción</div>':`<div class="numbox res">${fmt(r)}</div>`);
+    const [h,c]=viz(a,b);
+    dots.innerHTML=h; dots.style.display=h?'flex':'none'; cap.textContent=c;
+    if(err)ex_='<b>System.DivideByZeroException:</b> con números enteros, dividir entre 0 detiene el programa con un error.';
+    else if(op==='/'&&mode==='int')ex_=`<b>División entera:</b> con <code>int</code> se descarta la parte decimal. ${a} / ${b} da ${fmt(r)}. Cambia a <code>double</code> para obtener decimales.`;
+    else if(op==='/'&&b===0)ex_=`Con <code>double</code>, dividir entre 0 no falla: da <code>${fmt(r)}</code>.`;
+    else if(op==='/')ex_=`<b>División real:</b> con <code>double</code> se conservan los decimales.`;
+    else if(op==='%')ex_=`<b>Módulo:</b> es el resto de dividir a entre b. Sirve, por ejemplo, para saber si un número es par: <code>n % 2 == 0</code>.`;
+    else if(op==='*')ex_='<b>Multiplicación:</b> se escribe con asterisco, no con x.';
+    else if(op==='+')ex_='<b>Suma:</b> junta dos valores.';
+    else ex_='<b>Resta:</b> quita b de a.';
+    ex.innerHTML=ex_;
+  }
+  $$('#opBtns button').forEach(b=>b.onclick=()=>{op=b.dataset.op;$$('#opBtns button').forEach(x=>x.classList.toggle('on',x===b));compute();});
+  $$('#modeBtns button').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$$('#modeBtns button').forEach(x=>x.classList.toggle('on',x===b));compute();});
+  A.oninput=compute; B.oninput=compute; compute();
+})();
+
+/* ============ 4. CONDICIONALES ============ */
+(function(){
+  const sl=$('#nota'),val=$('#notaVal'),code=$('#ifCode'),verd=$('#ifVerdict');
+  function draw(){
+    const n=+sl.value; val.textContent=n;
+    renderCode(code,[`int nota = ${n};`,'','if (nota >= 90)','{','    Console.WriteLine("Excelente");','}','else if (nota >= 60)','{','    Console.WriteLine("Aprobado");','}','else','{','    Console.WriteLine("Reprobado");','}']);
+    const br=n>=90?0:(n>=60?1:2);
+    setActive(code,[[2,3,4,5],[2,6,7,8,9],[2,6,10,11,12,13]][br]);
+    const c0=$('#c0'),c1=$('#c1'),o=[$('#o0'),$('#o1'),$('#o2')];
+    [c0,c1,...o].forEach(e=>e.className='node');
+    c0.classList.add(br===0?'t':'f');
+    if(br===0){c1.classList.add('dim');o[1].classList.add('dim');o[2].classList.add('dim');o[0].classList.add('win');}
+    else{
+      c1.classList.add(br===1?'t':'f'); o[0].classList.add('dim');
+      if(br===1){o[1].classList.add('win');o[2].classList.add('dim');}else{o[1].classList.add('dim');o[2].classList.add('win');}
+    }
+    verd.textContent=['🏆 Excelente','👍 Aprobado','📚 Reprobado'][br];
+  }
+  sl.oninput=draw; draw();
+
+  let A=true,B=true;
+  function tt(){
+    $('#tA').className='toggle '+(A?'T':'F');$('#tA').textContent='A = '+A;
+    $('#tB').className='toggle '+(B?'T':'F');$('#tB').textContent='B = '+B;
+    const P=(l,v)=>`<div class="pill ${v?'T':'F'}">${l}<b>${v}</b></div>`;
+    $('#tPills').innerHTML=P('A && B  (y)',A&&B)+P('A || B  (o)',A||B)+P('!A  (no)',!A)+P('A == B',A===B);
+  }
+  $('#tA').onclick=()=>{A=!A;tt();};$('#tB').onclick=()=>{B=!B;tt();};tt();
+})();
+
+/* ============ 5. BUCLES ============ */
+(function(){
+  const nEl=$('#loopN'),nVal=$('#loopNVal'),code=$('#loopCode'),con=$('#con4'),tiles=$('#loopTiles'),ex=$('#loopExplain'),vb=$('#loopVar'),vi=$('#loopI');
+  const bStep=$('#loopStep'),bAuto=$('#loopAuto');
+  let N=5,events=[],pos=-1,timer=null;
+  function build(){
+    N=+nEl.value; nVal.textContent=N; events=[]; pos=-1; stop();
+    let i=1;
+    events.push({line:0,i:1,text:'Inicio: se crea la variable <code>i</code> con valor 1. Esto ocurre una sola vez.'});
+    while(i<=N){
+      events.push({line:0,i,cond:true,text:`Se revisa la condición: <code>${i} &lt;= ${N}</code>`});
+      events.push({line:2,i,tile:i,out:'Vuelta '+i,text:`Se ejecuta el cuerpo: imprime «Vuelta ${i}».`});
+      i++;
+      events.push({line:0,i,text:`Fin de la vuelta: <code>i++</code> suma 1 y ahora <code>i</code> vale ${i}.`});
+    }
+    events.push({line:0,i,cond:false,text:`Se revisa la condición: <code>${i} &lt;= ${N}</code>. Ya no se cumple, el bucle termina.`});
+    events.push({line:4,i:null,out:'Fin',text:'El programa continúa después del bucle. Ahora <code>i</code> ya no existe: solo vive dentro del <code>for</code>.'});
+    renderCode(code,[`for (int i = 1; i <= ${N}; i++)`,'{','    Console.WriteLine("Vuelta " + i);','}','Console.WriteLine("Fin");']);
+    draw();
+  }
+  function draw(){
+    const evs=events.slice(0,pos+1),cur=events[pos];
+    con.innerHTML='<div><span class="pr">$</span> dotnet run</div>'+evs.filter(e=>e.out).map(e=>`<div>${esc(e.out)}</div>`).join('');
+    tiles.innerHTML=Array.from({length:N},(_,k)=>{const n=k+1;return `<div class="tile${evs.some(e=>e.tile===n)?' done':''}${cur&&cur.tile===n?' now':''}">${n}</div>`;}).join('');
+    if(!cur){vi.textContent='–';vb.classList.add('gone');ex.innerHTML='Pulsa «Siguiente paso» para ejecutar el bucle línea por línea.';setActive(code,[]);return;}
+    if(cur.i==null){vi.textContent='✖';vb.classList.add('gone');}else{vi.textContent=cur.i;vb.classList.remove('gone');}
+    const b=cur.cond===undefined?'':`<span class="badge ${cur.cond?'T':'F'}">${cur.cond}</span>`;
+    ex.innerHTML=cur.text+b; setActive(code,[cur.line]);
+  }
+  function step(){if(pos<events.length-1){pos++;draw();}else stop();if(pos>=events.length-1)stop();}
+  function stop(){clearInterval(timer);timer=null;bAuto.textContent='▶ Automático';}
+  bStep.onclick=()=>{stop();if(pos<events.length-1){pos++;draw();}};
+  bAuto.onclick=()=>{
+    if(timer){stop();return;}
+    if(pos>=events.length-1){pos=-1;draw();}
+    bAuto.textContent='⏸ Pausa'; timer=setInterval(step,900);
+  };
+  $('#loopReset').onclick=build; nEl.oninput=build; build();
+})();
+
+/* ============ 6. ARREGLOS ============ */
+(function(){
+  let arr=['Manzana','Pera','Uva','Kiwi'],busy=false;
+  const cells=$('#arrCells'),idxEl=$('#arrIdx'),valEl=$('#arrVal'),con=$('#con5'),codeArr=$('#arrCode'),codeOp=$('#arrOp'),len=$('#arrLen');
+  const q=s=>'"'+s.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"';
+  const idx=()=>{const t=idxEl.value.trim();return /^-?\d+$/.test(t)?parseInt(t,10):NaN;};
+  function say(t,cls){
+    if(con.querySelector('.muted')&&!con.querySelector('div'))con.innerHTML='';
+    con.insertAdjacentHTML('beforeend',`<div class="${cls||''}">${esc(t)}</div>`);con.scrollTop=con.scrollHeight;
+  }
+  function drawCode(){renderCode(codeArr,[`string[] frutas = { ${arr.map(q).join(', ')} };`]);len.textContent=arr.length;}
+  function drawCells(hi){
+    const s=idx();
+    cells.innerHTML=arr.map((v,i)=>`<div class="cell${i===s?' sel':''}${i===hi?' hi':''}" data-i="${i}"><div class="v">${esc(v)}</div><div class="ix">[${i}]</div></div>`).join('');
+    $$('.cell',cells).forEach(c=>c.onclick=()=>{idxEl.value=c.dataset.i;drawCells();});
+  }
+  function setOp(lines,act){renderCode(codeOp,lines);setActive(codeOp,act||[]);}
+  function fail(n){
+    cells.classList.remove('shake');void cells.offsetWidth;cells.classList.add('shake');
+    say('Unhandled exception. System.IndexOutOfRangeException: el índice estaba fuera de los límites del arreglo.','err');
+    say(`frutas tiene ${arr.length} elementos: los índices válidos van de 0 a ${arr.length-1}.`,'muted');
+  }
+  const valid=n=>Number.isInteger(n)&&n>=0&&n<arr.length;
+  idxEl.oninput=()=>drawCells();
+  $('#arrRead').onclick=()=>{
+    if(busy)return; const n=idx(); if(Number.isNaN(n)){say('Escribe un índice entero.','err');return;}
+    setOp([`Console.WriteLine(frutas[${n}]);`],[0]);
+    if(!valid(n))return fail(n);
+    say(arr[n]); drawCells(n); setTimeout(()=>drawCells(),900);
+  };
+  $('#arrWrite').onclick=()=>{
+    if(busy)return; const n=idx(); if(Number.isNaN(n)){say('Escribe un índice entero.','err');return;}
+    const v=valEl.value; setOp([`frutas[${n}] = ${q(v)};`],[0]);
+    if(!valid(n))return fail(n);
+    arr[n]=v; drawCode(); drawCells(n); setTimeout(()=>drawCells(),900); say(`frutas[${n}] ahora vale ${q(v)}`,'muted');
+  };
+  $('#arrEach').onclick=async()=>{
+    if(busy)return; busy=true;
+    setOp(['foreach (string fruta in frutas)','{','    Console.WriteLine(fruta);','}']);
+    for(let i=0;i<arr.length;i++){
+      setActive(codeOp,[2]); drawCells(i); say(arr[i]); await sleep(650);
+    }
+    drawCells(); setActive(codeOp,[]); busy=false;
+  };
+  drawCode(); drawCells(); setOp(['Console.WriteLine(frutas[0]);']);
+})();
+
+/* ============ 7. QUIZ ============ */
+(function(){
+  const Q=[
+    {q:'¿Qué instrucción muestra texto en la consola?',o:['Console.WriteLine("Hola");','print("Hola");','echo "Hola";','Write.Console("Hola");'],a:0,why:'En C# se usa Console.WriteLine y la instrucción termina con punto y coma.'},
+    {q:'¿Qué tipo usarías para guardar el número 3.14?',o:['int','double','string','bool'],a:1,why:'double guarda números con decimales. int solo guarda enteros.'},
+    {q:'¿Cuánto vale r después de ejecutar: int r = 7 / 2; ?',o:['3.5','4','3','2'],a:2,why:'Con enteros la división descarta los decimales: 7 / 2 = 3.'},
+    {q:'¿Cuál es el resultado de 10 % 3 ?',o:['3','1','0','3.33'],a:1,why:'% da el resto de la división. 10 entre 3 es 3 y sobra 1.'},
+    {q:'¿Cuántas veces se ejecuta: for (int i = 0; i < 3; i++) ?',o:['2 veces','3 veces','4 veces','Infinitas'],a:1,why:'i vale 0, 1 y 2. Cuando llega a 3 la condición i < 3 deja de cumplirse.'},
+    {q:'Un arreglo tiene 4 elementos. ¿Cuál es el índice válido más grande?',o:['4','5','3','1'],a:2,why:'Los índices empiezan en 0, así que van de 0 a 3.'}
+  ];
+  let i=0,score=0,answered=false;
+  const box=$('#quizBox');
+  function render(){
+    if(i>=Q.length){
+      const em=score===Q.length?'🏆':(score>=4?'🎉':'💪');
+      const t=score===Q.length?'¡Perfecto! Dominas lo básico.':(score>=4?'¡Muy bien! Repasa las lecciones donde fallaste.':'Buen comienzo. Vuelve a las lecciones y prueba de nuevo.');
+      box.innerHTML=`<div class="final"><div class="big">${em}</div><h2>${score} de ${Q.length} correctas</h2><p class="lead" style="margin:0 auto 14px">${t}</p><button class="btn" id="qAgain">Intentar de nuevo</button></div>`;
+      $('#qAgain').onclick=()=>{i=0;score=0;render();};
+      return;
+    }
+    const it=Q[i]; answered=false;
+    box.innerHTML=`<h2>Ponte a prueba</h2><div class="qmeta">Pregunta ${i+1} de ${Q.length}</div><div class="q">${esc(it.q)}</div>
+      <div class="opts">${it.o.map((o,k)=>`<button class="opt" data-k="${k}">${esc(o)}</button>`).join('')}</div>
+      <div class="explain" id="qWhy" style="margin-top:14px;display:none"></div><div class="btnrow" id="qNext"></div>`;
+    $$('.opt',box).forEach(b=>b.onclick=()=>{
+      if(answered)return; answered=true; const k=+b.dataset.k;
+      $$('.opt',box).forEach(x=>{x.disabled=true;if(+x.dataset.k===it.a)x.classList.add('right');});
+      if(k===it.a)score++; else b.classList.add('wrong');
+      const w=$('#qWhy'); w.style.display='block'; w.innerHTML=(k===it.a?'<b>¡Correcto!</b> ':'<b>Casi.</b> ')+esc(it.why);
+      $('#qNext').innerHTML=`<button class="btn" id="qGo">${i===Q.length-1?'Ver resultado':'Siguiente pregunta'}</button>`;
+      $('#qGo').onclick=()=>{i++;render();};
+    });
+  }
+  render();
+})();
+
+go(0);
+</script>
+</body>
+</html>
